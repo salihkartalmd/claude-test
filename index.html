@@ -23,6 +23,49 @@
             --accent: #e94560;
             --success: #00d68f;
             --glow: rgba(233, 69, 96, 0.3);
+            --page-unchecked-border: rgba(255,255,255,0.15);
+            --page-unchecked-bg: rgba(255,255,255,0.02);
+            --header-bg: rgba(15, 15, 26, 0.85);
+            --panel-bg: rgba(0,0,0,0.15);
+            --action-btn-border: rgba(255,255,255,0.1);
+            --action-btn-bg: rgba(255,255,255,0.03);
+            --filter-border: rgba(255,255,255,0.1);
+            --filter-bg: rgba(255,255,255,0.03);
+            --progress-bg: rgba(255,255,255,0.03);
+            --progress-border: rgba(255,255,255,0.06);
+            --bar-bg: rgba(255,255,255,0.06);
+            --topic-bar-bg: rgba(255,255,255,0.08);
+            --scrollbar-thumb: rgba(255,255,255,0.1);
+            --reset-border: rgba(233, 69, 96, 0.3);
+            --reset-bg: rgba(233, 69, 96, 0.1);
+            --celebration-bg: rgba(15, 15, 26, 0.9);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #FDF6EF;
+            --bg-secondary: #F5E6D3;
+            --bg-card: #FFF8F0;
+            --text-primary: #2D1B0E;
+            --text-secondary: #8B6F5E;
+            --accent: #E07A3A;
+            --success: #2E8B57;
+            --glow: rgba(224, 122, 58, 0.3);
+            --page-unchecked-border: rgba(139, 111, 94, 0.25);
+            --page-unchecked-bg: rgba(255,255,255,0.5);
+            --header-bg: rgba(253, 246, 239, 0.9);
+            --panel-bg: rgba(245, 230, 211, 0.4);
+            --action-btn-border: rgba(139, 111, 94, 0.2);
+            --action-btn-bg: rgba(255,255,255,0.5);
+            --filter-border: rgba(139, 111, 94, 0.2);
+            --filter-bg: rgba(255,255,255,0.5);
+            --progress-bg: rgba(245, 230, 211, 0.5);
+            --progress-border: rgba(139, 111, 94, 0.1);
+            --bar-bg: rgba(139, 111, 94, 0.12);
+            --topic-bar-bg: rgba(139, 111, 94, 0.12);
+            --scrollbar-thumb: rgba(139, 111, 94, 0.2);
+            --reset-border: rgba(224, 122, 58, 0.3);
+            --reset-bg: rgba(224, 122, 58, 0.1);
+            --celebration-bg: rgba(253, 246, 239, 0.95);
         }
 
         * {
@@ -69,7 +112,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(15, 15, 26, 0.85);
+            background: var(--header-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             padding: 16px 20px;
@@ -118,10 +161,10 @@
 
         /* Overall progress */
         .overall-progress {
-            background: rgba(255,255,255,0.03);
+            background: var(--progress-bg);
             border-radius: 16px;
             padding: 14px 16px;
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid var(--progress-border);
         }
 
         .progress-stats {
@@ -145,7 +188,7 @@
 
         .progress-bar-bg {
             height: 10px;
-            background: rgba(255,255,255,0.06);
+            background: var(--bar-bg);
             border-radius: 10px;
             overflow: hidden;
             position: relative;
@@ -201,12 +244,12 @@
 
         .streak-badge.topics {
             background: rgba(233, 69, 96, 0.15);
-            color: #ff6b6b;
+            color: var(--accent);
         }
 
         .streak-badge.percent {
             background: rgba(0, 214, 143, 0.15);
-            color: #00d68f;
+            color: var(--success);
         }
 
         /* Main content */
@@ -299,7 +342,7 @@
         .topic-bar-bg {
             flex: 1;
             height: 6px;
-            background: rgba(255,255,255,0.08);
+            background: var(--topic-bar-bg);
             border-radius: 6px;
             overflow: hidden;
         }
@@ -365,7 +408,7 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            background: rgba(0,0,0,0.15);
+            background: var(--panel-bg);
         }
 
         .topic-card.expanded .pages-panel {
@@ -383,8 +426,8 @@
             width: 48px;
             height: 48px;
             border-radius: 12px;
-            border: 2px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.03);
+            border: 2px dashed var(--page-unchecked-border);
+            background: var(--page-unchecked-bg);
             color: var(--text-secondary);
             font-size: 0.85rem;
             font-weight: 700;
@@ -396,6 +439,7 @@
             position: relative;
             overflow: hidden;
             font-family: 'Nunito', sans-serif;
+            opacity: 0.6;
         }
 
         .page-btn::before {
@@ -413,9 +457,18 @@
 
         .page-btn.checked {
             color: white;
-            border-color: transparent;
-            transform: scale(1);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 2px solid transparent;
+            opacity: 1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .page-btn.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 3px;
+            font-size: 0.55rem;
+            opacity: 0.9;
         }
 
         .page-btn.checked::before {
@@ -450,8 +503,8 @@
             flex: 1;
             padding: 10px;
             border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--action-btn-border);
+            background: var(--action-btn-bg);
             color: var(--text-secondary);
             font-size: 0.8rem;
             font-weight: 700;
@@ -507,7 +560,7 @@
         .celebration-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 15, 26, 0.9);
+            background: var(--celebration-bg);
             backdrop-filter: blur(10px);
             z-index: 10000;
             display: flex;
@@ -586,9 +639,9 @@
         .reset-btn {
             padding: 10px 24px;
             border-radius: 30px;
-            border: 1px solid rgba(233, 69, 96, 0.3);
-            background: rgba(233, 69, 96, 0.1);
-            color: #e94560;
+            border: 1px solid var(--reset-border);
+            background: var(--reset-bg);
+            color: var(--accent);
             font-size: 0.85rem;
             font-weight: 700;
             cursor: pointer;
@@ -614,7 +667,7 @@
         /* Scrollbar */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
 
         /* Topic completion stamp */
         .topic-stamp {
@@ -658,8 +711,8 @@
         .filter-tab {
             padding: 8px 16px;
             border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--filter-border);
+            background: var(--filter-bg);
             color: var(--text-secondary);
             font-size: 0.8rem;
             font-weight: 700;
@@ -678,6 +731,73 @@
 
         .filter-tab:active {
             transform: scale(0.95);
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            cursor: pointer;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.9);
+        }
+
+        [data-theme="light"] .theme-toggle {
+            border-color: rgba(139, 111, 94, 0.2);
+            box-shadow: 0 4px 20px rgba(139, 111, 94, 0.15);
+        }
+
+        /* Light theme overrides */
+        [data-theme="light"] .bg-animation .neuron {
+            opacity: 0.04;
+        }
+
+        [data-theme="light"] .header {
+            border-bottom: 1px solid rgba(139, 111, 94, 0.1);
+        }
+
+        [data-theme="light"] .topic-card {
+            border: 1px solid rgba(139, 111, 94, 0.1);
+            box-shadow: 0 2px 12px rgba(139, 111, 94, 0.06);
+        }
+
+        [data-theme="light"] .page-btn.checked {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        [data-theme="light"] .progress-bar-fill {
+            background: linear-gradient(90deg, #E07A3A, #F0A060, #D4845A, #C66E30);
+        }
+
+        [data-theme="light"] .celebration-close {
+            background: linear-gradient(135deg, #E07A3A, #F0A060);
+        }
+
+        [data-theme="light"] .celebration-text {
+            background: linear-gradient(135deg, #E07A3A, #D4845A, #C66E30);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        [data-theme="light"] .pages-action-btn:hover {
+            background: rgba(139, 111, 94, 0.1);
         }
     </style>
 </head>
@@ -721,6 +841,8 @@
             <button class="reset-btn" onclick="resetAll()">🔄 Sıfırla</button>
         </div>
     </main>
+
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">☀️</button>
 
     <div class="confetti-container" id="confettiContainer"></div>
 
@@ -1175,6 +1297,31 @@
         createBgNeurons();
         renderTopics();
         updateUI();
+
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', next);
+            document.getElementById('themeToggle').textContent = next === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('neurotrack_theme', next);
+
+            // Update meta theme-color
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.content = next === 'light' ? '#FDF6EF' : '#1a1a2e';
+        }
+
+        // Load saved theme
+        (function() {
+            const saved = localStorage.getItem('neurotrack_theme');
+            if (saved === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('themeToggle').textContent = '🌙';
+                const meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.content = '#FDF6EF';
+            }
+        })();
 
         // Register service worker
         if ('serviceWorker' in navigator) {
