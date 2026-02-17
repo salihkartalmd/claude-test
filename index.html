@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NeuroTrack">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>NeuroTrack - Nöroanatomi Takip</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --text-primary: #eee;
+            --text-secondary: #a0a0b8;
+            --accent: #e94560;
+            --success: #00d68f;
+            --glow: rgba(233, 69, 96, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 100px;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .bg-animation .neuron {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.08;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+            25% { transform: translateY(-30px) rotate(90deg) scale(1.1); }
+            50% { transform: translateY(-15px) rotate(180deg) scale(1); }
+            75% { transform: translateY(-40px) rotate(270deg) scale(1.05); }
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 15, 26, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .header-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+
+        .brain-icon {
+            font-size: 1.6rem;
+            animation: pulse-brain 2s infinite;
+            display: inline-block;
+        }
+
+        @keyframes pulse-brain {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(233,69,96,0.6)); }
+        }
+
+        .title-text {
+            background: linear-gradient(135deg, #e94560, #ff6b6b, #feca57, #48dbfb);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 4s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Overall progress */
+        .overall-progress {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 14px 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .progress-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .progress-numbers {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .progress-bar-bg {
+            height: 10px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #e94560, #ff6b6b, #feca57, #48dbfb, #0abde3);
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
+            transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+        }
+
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 30px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
+            border-radius: 10px;
+            animation: glow-pulse 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .streak-info {
+            display: flex;
+            gap: 16px;
+            margin-top: 10px;
+        }
+
+        .streak-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .streak-badge.topics {
+            background: rgba(233, 69, 96, 0.15);
+            color: #ff6b6b;
+        }
+
+        .streak-badge.percent {
+            background: rgba(0, 214, 143, 0.15);
+            color: #00d68f;
+        }
+
+        /* Main content */
+        .main-content {
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        /* Topic cards */
+        .topic-card {
+            border-radius: 20px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            animation: card-enter 0.5s ease-out both;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .topic-card:active {
+            transform: scale(0.98);
+        }
+
+        @keyframes card-enter {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .topic-header {
+            padding: 16px 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .topic-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0.06;
+            transition: opacity 0.3s;
+        }
+
+        .topic-header:hover::before {
+            opacity: 0.1;
+        }
+
+        .topic-emoji {
+            font-size: 1.8rem;
+            min-width: 40px;
+            text-align: center;
+            animation: bounce-soft 3s infinite ease-in-out;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        @keyframes bounce-soft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .topic-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .topic-name {
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+
+        .topic-progress-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .topic-bar-bg {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .topic-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+        }
+
+        .topic-bar-fill.complete {
+            animation: complete-glow 2s infinite;
+        }
+
+        @keyframes complete-glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        .topic-percent {
+            font-size: 0.8rem;
+            font-weight: 800;
+            min-width: 38px;
+            text-align: right;
+        }
+
+        .topic-check {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .topic-check.done {
+            animation: check-pop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes check-pop {
+            0% { transform: scale(0); }
+            60% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .chevron {
+            font-size: 1rem;
+            transition: transform 0.3s;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .topic-card.expanded .chevron {
+            transform: rotate(180deg);
+        }
+
+        /* Pages panel */
+        .pages-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background: rgba(0,0,0,0.15);
+        }
+
+        .topic-card.expanded .pages-panel {
+            max-height: 1000px;
+        }
+
+        .pages-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 14px 18px 18px;
+        }
+
+        .page-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .page-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            transition: all 0.4s;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+        }
+
+        .page-btn.checked {
+            color: white;
+            border-color: transparent;
+            transform: scale(1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .page-btn.checked::before {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            opacity: 1;
+        }
+
+        .page-btn:active {
+            transform: scale(0.9);
+        }
+
+        .page-btn.just-checked {
+            animation: page-check-bounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes page-check-bounce {
+            0% { transform: scale(1); }
+            30% { transform: scale(0.8); }
+            60% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        .pages-actions {
+            display: flex;
+            gap: 8px;
+            padding: 0 18px 14px;
+        }
+
+        .pages-action-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .pages-action-btn:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--text-primary);
+        }
+
+        .pages-action-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* Confetti */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(0) rotateZ(0deg) rotateX(0deg);
+                opacity: 1;
+            }
+            75% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotateZ(720deg) rotateX(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Completion celebration */
+        .celebration-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 15, 26, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .celebration-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .celebration-content {
+            text-align: center;
+            animation: celebration-pop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes celebration-pop {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+
+        .celebration-emoji {
+            font-size: 5rem;
+            animation: celebration-bounce 1s infinite;
+        }
+
+        @keyframes celebration-bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.1); }
+        }
+
+        .celebration-text {
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin: 20px 0 10px;
+            background: linear-gradient(135deg, #feca57, #ff6b6b, #48dbfb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .celebration-sub {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .celebration-close {
+            margin-top: 30px;
+            padding: 12px 40px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            color: white;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            transition: transform 0.2s;
+        }
+
+        .celebration-close:active {
+            transform: scale(0.95);
+        }
+
+        /* Reset button */
+        .reset-section {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .reset-btn {
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: 1px solid rgba(233, 69, 96, 0.3);
+            background: rgba(233, 69, 96, 0.1);
+            color: #e94560;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.95);
+            background: rgba(233, 69, 96, 0.2);
+        }
+
+        /* Motivational message */
+        .motivation {
+            text-align: center;
+            padding: 10px 20px 20px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        /* Topic completion stamp */
+        .topic-stamp {
+            position: absolute;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-12deg);
+            font-size: 0.65rem;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 2px solid;
+            opacity: 0;
+            transition: opacity 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .topic-stamp.visible {
+            opacity: 0.8;
+            animation: stamp-appear 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes stamp-appear {
+            0% { transform: translateY(-50%) rotate(-12deg) scale(2); opacity: 0; }
+            100% { transform: translateY(-50%) rotate(-12deg) scale(1); opacity: 0.8; }
+        }
+
+        /* Filter tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 12px 0 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .filter-tabs::-webkit-scrollbar { display: none; }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-family: 'Nunito', sans-serif;
+            flex-shrink: 0;
+        }
+
+        .filter-tab.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .filter-tab:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="app-title">
+                <span class="brain-icon">🧠</span>
+                <span class="title-text">NeuroTrack</span>
+            </div>
+            <div class="overall-progress">
+                <div class="progress-stats">
+                    <span class="progress-label">Genel İlerleme</span>
+                    <span class="progress-numbers" id="progressNumbers">0 / 193 sayfa</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+                </div>
+                <div class="streak-info">
+                    <span class="streak-badge topics" id="topicsBadge">📚 0/33 konu</span>
+                    <span class="streak-badge percent" id="percentBadge">🎯 %0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="filter-tabs" id="filterTabs">
+            <button class="filter-tab active" data-filter="all">Tümü</button>
+            <button class="filter-tab" data-filter="incomplete">Devam Eden</button>
+            <button class="filter-tab" data-filter="complete">Tamamlanan</button>
+        </div>
+
+        <div id="topicsContainer"></div>
+
+        <div class="motivation" id="motivationText"></div>
+
+        <div class="reset-section">
+            <button class="reset-btn" onclick="resetAll()">🔄 Sıfırla</button>
+        </div>
+    </main>
+
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <div class="celebration-overlay" id="celebrationOverlay">
+        <div class="celebration-content">
+            <div class="celebration-emoji">🎉🧠🎓</div>
+            <div class="celebration-text">Konu Tamamlandı!</div>
+            <div class="celebration-sub" id="celebrationSub"></div>
+            <button class="celebration-close" onclick="closeCelebration()">Harika! 🚀</button>
+        </div>
+    </div>
+
+    <script>
+        // Topics data
+        const topics = [
+            { name: "Başlık", pages: [1], emoji: "📖", color: "#e94560", gradient: "linear-gradient(135deg, #e94560, #ff6b6b)" },
+            { name: "Giriş", pages: [2, 3], emoji: "🎯", color: "#ff6b6b", gradient: "linear-gradient(135deg, #ff6b6b, #ee5a24)" },
+            { name: "Medulla Spinalis", pages: range(4, 8), emoji: "🦴", color: "#feca57", gradient: "linear-gradient(135deg, #feca57, #f0932b)" },
+            { name: "Afferent Yollar", pages: range(9, 16), emoji: "⬆️", color: "#48dbfb", gradient: "linear-gradient(135deg, #48dbfb, #0abde3)" },
+            { name: "Efferent Yollar", pages: range(17, 26), emoji: "⬇️", color: "#ff9ff3", gradient: "linear-gradient(135deg, #ff9ff3, #f368e0)" },
+            { name: "Medulla Oblongata", pages: range(27, 34), emoji: "🫀", color: "#55efc4", gradient: "linear-gradient(135deg, #55efc4, #00b894)" },
+            { name: "Pons", pages: range(35, 39), emoji: "🌉", color: "#a29bfe", gradient: "linear-gradient(135deg, #a29bfe, #6c5ce7)" },
+            { name: "Mesencephalon", pages: range(40, 43), emoji: "🔬", color: "#fd79a8", gradient: "linear-gradient(135deg, #fd79a8, #e84393)" },
+            { name: "Cerebellum", pages: range(44, 53), emoji: "🎭", color: "#fdcb6e", gradient: "linear-gradient(135deg, #fdcb6e, #e17055)" },
+            { name: "Kraniel Sinirler (1-6)", pages: range(54, 70), emoji: "⚡", color: "#6c5ce7", gradient: "linear-gradient(135deg, #6c5ce7, #a29bfe)" },
+            { name: "Kraniel Sinirler (7-12)", pages: range(71, 87), emoji: "🔌", color: "#00cec9", gradient: "linear-gradient(135deg, #00cec9, #81ecec)" },
+            { name: "Otonom Sinir Sistemi", pages: range(88, 89), emoji: "🤖", color: "#e17055", gradient: "linear-gradient(135deg, #e17055, #d63031)" },
+            { name: "Sempatik Sinir Sistemi", pages: range(90, 91), emoji: "🔥", color: "#d63031", gradient: "linear-gradient(135deg, #d63031, #ff7675)" },
+            { name: "Parasempatik Sinir Sistemi", pages: range(92, 95), emoji: "🧘", color: "#00b894", gradient: "linear-gradient(135deg, #00b894, #55efc4)" },
+            { name: "Thalamus", pages: range(96, 101), emoji: "🎛️", color: "#0984e3", gradient: "linear-gradient(135deg, #0984e3, #74b9ff)" },
+            { name: "Hypothalamus", pages: range(102, 109), emoji: "🌡️", color: "#e84393", gradient: "linear-gradient(135deg, #e84393, #fd79a8)" },
+            { name: "Epithalamus", pages: range(110, 112), emoji: "🌙", color: "#636e72", gradient: "linear-gradient(135deg, #636e72, #b2bec3)" },
+            { name: "Subthalamus", pages: range(113, 114), emoji: "⚙️", color: "#fab1a0", gradient: "linear-gradient(135deg, #fab1a0, #e17055)" },
+            { name: "Nuclei Basales", pages: range(115, 120), emoji: "🏛️", color: "#dfe6e9", gradient: "linear-gradient(135deg, #dfe6e9, #b2bec3)" },
+            { name: "Hypophysis", pages: range(121, 123), emoji: "💧", color: "#74b9ff", gradient: "linear-gradient(135deg, #74b9ff, #0984e3)" },
+            { name: "Beyin Hemisferleri", pages: range(124, 132), emoji: "🧩", color: "#a29bfe", gradient: "linear-gradient(135deg, #a29bfe, #6c5ce7)" },
+            { name: "Beyaz Cevher", pages: range(133, 137), emoji: "🤍", color: "#dfe6e9", gradient: "linear-gradient(135deg, #dfe6e9, #a0a0b8)" },
+            { name: "Beyin Ventrikülleri ve BOS", pages: range(138, 141), emoji: "💦", color: "#81ecec", gradient: "linear-gradient(135deg, #81ecec, #00cec9)" },
+            { name: "Beyin Zarları ve Sinüsleri", pages: range(142, 146), emoji: "🛡️", color: "#ffeaa7", gradient: "linear-gradient(135deg, #ffeaa7, #fdcb6e)" },
+            { name: "MSS Arterleri", pages: range(147, 151), emoji: "❤️", color: "#ff7675", gradient: "linear-gradient(135deg, #ff7675, #d63031)" },
+            { name: "MSS Venleri", pages: range(152, 153), emoji: "💙", color: "#74b9ff", gradient: "linear-gradient(135deg, #74b9ff, #0984e3)" },
+            { name: "Rhinencephalon, Koku Yolları ve Limbik Sistem", pages: range(154, 161), emoji: "👃", color: "#e056a0", gradient: "linear-gradient(135deg, #e056a0, #c44569)" },
+            { name: "Orbita", pages: range(162, 168), emoji: "👁️", color: "#58B19F", gradient: "linear-gradient(135deg, #58B19F, #38ada9)" },
+            { name: "Bulbus Oculi", pages: range(169, 173), emoji: "🔮", color: "#82589F", gradient: "linear-gradient(135deg, #82589F, #6c5ce7)" },
+            { name: "Görme Yolları", pages: range(174, 179), emoji: "👀", color: "#3dc1d3", gradient: "linear-gradient(135deg, #3dc1d3, #0984e3)" },
+            { name: "Kulak", pages: range(180, 184), emoji: "👂", color: "#f8a5c2", gradient: "linear-gradient(135deg, #f8a5c2, #e056a0)" },
+            { name: "Vestibular Sistem", pages: range(185, 188), emoji: "🎢", color: "#f3a683", gradient: "linear-gradient(135deg, #f3a683, #e17055)" },
+            { name: "İşitme Yolları", pages: range(189, 193), emoji: "🎵", color: "#778beb", gradient: "linear-gradient(135deg, #778beb, #546de5)" },
+        ];
+
+        function range(start, end) {
+            const arr = [];
+            for (let i = start; i <= end; i++) arr.push(i);
+            return arr;
+        }
+
+        // State
+        let checkedPages = new Set();
+        let currentFilter = 'all';
+        let expandedTopic = -1;
+        let celebratedTopics = new Set();
+
+        // Load state
+        function loadState() {
+            try {
+                const saved = localStorage.getItem('neurotrack_pages');
+                if (saved) checkedPages = new Set(JSON.parse(saved));
+
+                const celebrated = localStorage.getItem('neurotrack_celebrated');
+                if (celebrated) celebratedTopics = new Set(JSON.parse(celebrated));
+            } catch (e) {}
+
+            // Page 1 always checked
+            checkedPages.add(1);
+        }
+
+        function saveState() {
+            localStorage.setItem('neurotrack_pages', JSON.stringify([...checkedPages]));
+            localStorage.setItem('neurotrack_celebrated', JSON.stringify([...celebratedTopics]));
+        }
+
+        // Toggle page
+        function togglePage(page, topicIndex) {
+            if (page === 1) return; // Page 1 always checked
+
+            const btn = document.querySelector(`[data-page="${page}"]`);
+
+            if (checkedPages.has(page)) {
+                checkedPages.delete(page);
+                if (btn) btn.classList.remove('checked', 'just-checked');
+            } else {
+                checkedPages.add(page);
+                if (btn) {
+                    btn.classList.add('checked', 'just-checked');
+                    setTimeout(() => btn.classList.remove('just-checked'), 500);
+                }
+                // Mini confetti for page check
+                createMiniConfetti(btn);
+            }
+
+            saveState();
+            updateUI();
+
+            // Check if topic just completed
+            const topic = topics[topicIndex];
+            const topicComplete = topic.pages.every(p => checkedPages.has(p));
+            if (topicComplete && !celebratedTopics.has(topicIndex)) {
+                celebratedTopics.add(topicIndex);
+                saveState();
+                setTimeout(() => celebrateTopic(topicIndex), 300);
+            }
+        }
+
+        // Select/Deselect all pages in a topic
+        function selectAllPages(topicIndex) {
+            const topic = topics[topicIndex];
+            topic.pages.forEach(p => checkedPages.add(p));
+            saveState();
+            updateUI();
+            renderPages(topicIndex);
+
+            const topicComplete = topic.pages.every(p => checkedPages.has(p));
+            if (topicComplete && !celebratedTopics.has(topicIndex)) {
+                celebratedTopics.add(topicIndex);
+                saveState();
+                setTimeout(() => celebrateTopic(topicIndex), 300);
+            }
+        }
+
+        function deselectAllPages(topicIndex) {
+            const topic = topics[topicIndex];
+            topic.pages.forEach(p => {
+                if (p !== 1) checkedPages.delete(p);
+            });
+            celebratedTopics.delete(topicIndex);
+            saveState();
+            updateUI();
+            renderPages(topicIndex);
+        }
+
+        // Toggle topic expansion
+        function toggleTopic(index) {
+            const wasExpanded = expandedTopic === index;
+
+            // Close current
+            if (expandedTopic >= 0) {
+                const prevCard = document.querySelector(`[data-topic="${expandedTopic}"]`);
+                if (prevCard) prevCard.classList.remove('expanded');
+            }
+
+            if (wasExpanded) {
+                expandedTopic = -1;
+            } else {
+                expandedTopic = index;
+                const card = document.querySelector(`[data-topic="${index}"]`);
+                if (card) {
+                    card.classList.add('expanded');
+                    renderPages(index);
+                    // Scroll into view
+                    setTimeout(() => {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 100);
+                }
+            }
+        }
+
+        function renderPages(topicIndex) {
+            const topic = topics[topicIndex];
+            const grid = document.querySelector(`[data-pages="${topicIndex}"]`);
+            if (!grid) return;
+
+            grid.innerHTML = topic.pages.map(p => {
+                const isChecked = checkedPages.has(p);
+                return `<button class="page-btn ${isChecked ? 'checked' : ''}"
+                    data-page="${p}"
+                    onclick="togglePage(${p}, ${topicIndex})"
+                    style="${isChecked ? `background: ${topic.gradient}; border-color: transparent;` : ''}">
+                    <span style="position:relative;z-index:1">${p}</span>
+                </button>`;
+            }).join('');
+
+            // Actions
+            const actions = document.querySelector(`[data-actions="${topicIndex}"]`);
+            if (actions) {
+                actions.innerHTML = `
+                    <button class="pages-action-btn" onclick="selectAllPages(${topicIndex})">✅ Tümünü Seç</button>
+                    <button class="pages-action-btn" onclick="deselectAllPages(${topicIndex})">❌ Temizle</button>
+                `;
+            }
+        }
+
+        // Celebration
+        function celebrateTopic(topicIndex) {
+            const topic = topics[topicIndex];
+            document.getElementById('celebrationSub').textContent = `"${topic.name}" konusunu bitirdin!`;
+            document.getElementById('celebrationOverlay').classList.add('show');
+            createConfetti(40);
+        }
+
+        function closeCelebration() {
+            document.getElementById('celebrationOverlay').classList.remove('show');
+        }
+
+        // Confetti
+        function createConfetti(count) {
+            const container = document.getElementById('confettiContainer');
+            const colors = ['#e94560', '#ff6b6b', '#feca57', '#48dbfb', '#55efc4', '#a29bfe', '#fd79a8', '#00cec9'];
+
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = Math.random() * 100 + '%';
+                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.width = (Math.random() * 10 + 6) + 'px';
+                    piece.style.height = (Math.random() * 10 + 6) + 'px';
+                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    piece.style.animationDelay = Math.random() * 0.5 + 's';
+                    container.appendChild(piece);
+                    setTimeout(() => piece.remove(), 4000);
+                }, i * 50);
+            }
+        }
+
+        function createMiniConfetti(btn) {
+            if (!btn) return;
+            const rect = btn.getBoundingClientRect();
+            const container = document.getElementById('confettiContainer');
+            const colors = ['#feca57', '#ff6b6b', '#48dbfb', '#55efc4'];
+
+            for (let i = 0; i < 6; i++) {
+                const piece = document.createElement('div');
+                piece.style.cssText = `
+                    position: fixed;
+                    width: 5px;
+                    height: 5px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: 50%;
+                    left: ${rect.left + rect.width / 2}px;
+                    top: ${rect.top + rect.height / 2}px;
+                    pointer-events: none;
+                    z-index: 9999;
+                    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                `;
+                container.appendChild(piece);
+                requestAnimationFrame(() => {
+                    piece.style.transform = `translate(${(Math.random() - 0.5) * 60}px, ${(Math.random() - 0.5) * 60}px) scale(0)`;
+                    piece.style.opacity = '0';
+                });
+                setTimeout(() => piece.remove(), 700);
+            }
+        }
+
+        // Update UI
+        function updateUI() {
+            const totalChecked = checkedPages.size;
+            const totalPages = 193;
+            const percent = Math.round((totalChecked / totalPages) * 100);
+
+            document.getElementById('progressNumbers').textContent = `${totalChecked} / ${totalPages} sayfa`;
+            document.getElementById('progressBarFill').style.width = percent + '%';
+
+            let completedTopics = 0;
+            topics.forEach(t => {
+                if (t.pages.every(p => checkedPages.has(p))) completedTopics++;
+            });
+
+            document.getElementById('topicsBadge').textContent = `📚 ${completedTopics}/${topics.length} konu`;
+            document.getElementById('percentBadge').textContent = `🎯 %${percent}`;
+
+            // Update topic cards
+            topics.forEach((topic, i) => {
+                const card = document.querySelector(`[data-topic="${i}"]`);
+                if (!card) return;
+
+                const checked = topic.pages.filter(p => checkedPages.has(p)).length;
+                const total = topic.pages.length;
+                const topicPercent = Math.round((checked / total) * 100);
+                const isComplete = checked === total;
+
+                // Update bar
+                const bar = card.querySelector('.topic-bar-fill');
+                if (bar) {
+                    bar.style.width = topicPercent + '%';
+                    bar.style.background = topic.gradient;
+                    if (isComplete) bar.classList.add('complete');
+                    else bar.classList.remove('complete');
+                }
+
+                // Update percent text
+                const pct = card.querySelector('.topic-percent');
+                if (pct) {
+                    pct.textContent = `%${topicPercent}`;
+                    pct.style.color = isComplete ? '#00d68f' : topic.color;
+                }
+
+                // Update check
+                const check = card.querySelector('.topic-check');
+                if (check) {
+                    if (isComplete) {
+                        check.innerHTML = '✓';
+                        check.style.background = 'rgba(0, 214, 143, 0.2)';
+                        check.style.color = '#00d68f';
+                        check.classList.add('done');
+                    } else {
+                        check.innerHTML = `<span style="font-size:0.7rem">${checked}/${total}</span>`;
+                        check.style.background = `rgba(255,255,255,0.05)`;
+                        check.style.color = topic.color;
+                        check.classList.remove('done');
+                    }
+                }
+
+                // Stamp
+                const stamp = card.querySelector('.topic-stamp');
+                if (stamp) {
+                    if (isComplete) {
+                        stamp.classList.add('visible');
+                        stamp.style.color = '#00d68f';
+                        stamp.style.borderColor = '#00d68f';
+                    } else {
+                        stamp.classList.remove('visible');
+                    }
+                }
+
+                // Filter visibility
+                if (currentFilter === 'complete' && !isComplete) card.style.display = 'none';
+                else if (currentFilter === 'incomplete' && isComplete) card.style.display = 'none';
+                else card.style.display = 'block';
+            });
+
+            // Motivation
+            updateMotivation(percent, completedTopics);
+        }
+
+        function updateMotivation(percent, completedTopics) {
+            const messages = [
+                { max: 5, texts: ["Yolculuk başlıyor! 🚀", "Haydi başlayalım! 💪", "İlk adım en önemlisi! 🌟"] },
+                { max: 15, texts: ["Güzel gidiyorsun! 📚", "Devam et, harika! 🔥", "Temponu koru! ⭐"] },
+                { max: 30, texts: ["Nöronların ateş ediyor! ⚡", "Sinapslar güçleniyor! 🧠", "Çeyreği geçtin! 🎯"] },
+                { max: 50, texts: ["Yarı yola geldin! 🏃", "Muhteşem ilerleme! 🌈", "Beyinler yanıyor! 🔥"] },
+                { max: 70, texts: ["Durdurulamıyorsun! 🚀", "Nöroanatomi ustası oluyorsun! 🎓", "Finişe yaklaşıyorsun! 💫"] },
+                { max: 90, texts: ["Son düzlük! 🏁", "Efsane ilerleme! 🏆", "Neredeyse tamam! 🎉"] },
+                { max: 99, texts: ["Son birkaç sayfa! 📖", "Heyecan dorukta! 🎊", "Bitirmek üzeresin! ⚡"] },
+                { max: 100, texts: ["TAMAMLADIN! Tebrikler! 🎓🧠🏆", "Nöroanatomi ustası! 🎉👑", "Efsane! Her sayfayı bitirdin! 🌟🎊"] },
+            ];
+
+            const group = messages.find(m => percent <= m.max);
+            const text = group.texts[Math.floor(Math.random() * group.texts.length)];
+            document.getElementById('motivationText').textContent = text;
+        }
+
+        // Render all topics
+        function renderTopics() {
+            const container = document.getElementById('topicsContainer');
+            container.innerHTML = topics.map((topic, i) => {
+                const checked = topic.pages.filter(p => checkedPages.has(p)).length;
+                const total = topic.pages.length;
+                const topicPercent = Math.round((checked / total) * 100);
+                const isComplete = checked === total;
+
+                return `
+                <div class="topic-card" data-topic="${i}" style="animation-delay: ${i * 0.04}s; background: ${topic.gradient.replace('135deg', '135deg').replace(/,\s*#\w+\)/, ', rgba(255,255,255,0.04))')
+                    .replace('linear-gradient', 'linear-gradient')}; background: linear-gradient(135deg, ${hexToRgba(topic.color, 0.08)}, ${hexToRgba(topic.color, 0.02)});">
+                    <div class="topic-header" onclick="toggleTopic(${i})">
+                        <div class="topic-emoji" style="animation-delay: ${i * 0.2}s">${topic.emoji}</div>
+                        <div class="topic-info">
+                            <div class="topic-name" style="color: ${lightenColor(topic.color, 30)}">${topic.name}</div>
+                            <div class="topic-progress-row">
+                                <div class="topic-bar-bg">
+                                    <div class="topic-bar-fill ${isComplete ? 'complete' : ''}" style="width: ${topicPercent}%; background: ${topic.gradient}"></div>
+                                </div>
+                                <div class="topic-percent" style="color: ${isComplete ? '#00d68f' : topic.color}">%${topicPercent}</div>
+                            </div>
+                        </div>
+                        <span class="topic-stamp ${isComplete ? 'visible' : ''}" style="color: #00d68f; border-color: #00d68f;">Tamam</span>
+                        <div class="topic-check ${isComplete ? 'done' : ''}" style="background: ${isComplete ? 'rgba(0,214,143,0.2)' : 'rgba(255,255,255,0.05)'}; color: ${isComplete ? '#00d68f' : topic.color}">
+                            ${isComplete ? '✓' : `<span style="font-size:0.7rem">${checked}/${total}</span>`}
+                        </div>
+                        <div class="chevron">▼</div>
+                    </div>
+                    <div class="pages-panel">
+                        <div class="pages-grid" data-pages="${i}"></div>
+                        <div class="pages-actions" data-actions="${i}"></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // Color helpers
+        function hexToRgba(hex, alpha) {
+            hex = hex.replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function lightenColor(hex, percent) {
+            hex = hex.replace('#', '');
+            let r = parseInt(hex.substring(0, 2), 16);
+            let g = parseInt(hex.substring(2, 4), 16);
+            let b = parseInt(hex.substring(4, 6), 16);
+            r = Math.min(255, r + Math.round((255 - r) * percent / 100));
+            g = Math.min(255, g + Math.round((255 - g) * percent / 100));
+            b = Math.min(255, b + Math.round((255 - b) * percent / 100));
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // Background animation
+        function createBgNeurons() {
+            const container = document.getElementById('bgAnimation');
+            const colors = ['#e94560', '#48dbfb', '#55efc4', '#a29bfe', '#feca57', '#ff9ff3'];
+            for (let i = 0; i < 15; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron';
+                const size = Math.random() * 200 + 50;
+                neuron.style.width = size + 'px';
+                neuron.style.height = size + 'px';
+                neuron.style.left = Math.random() * 100 + '%';
+                neuron.style.top = Math.random() * 100 + '%';
+                neuron.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]}, transparent)`;
+                neuron.style.animationDelay = Math.random() * 10 + 's';
+                neuron.style.animationDuration = (Math.random() * 15 + 15) + 's';
+                container.appendChild(neuron);
+            }
+        }
+
+        // Filter tabs
+        document.getElementById('filterTabs').addEventListener('click', (e) => {
+            if (!e.target.classList.contains('filter-tab')) return;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            e.target.classList.add('active');
+            currentFilter = e.target.dataset.filter;
+            updateUI();
+        });
+
+        // Reset
+        function resetAll() {
+            if (confirm('Tüm ilerleme sıfırlansın mı? Bu işlem geri alınamaz!')) {
+                checkedPages = new Set([1]);
+                celebratedTopics = new Set();
+                expandedTopic = -1;
+                saveState();
+                renderTopics();
+                updateUI();
+            }
+        }
+
+        // Init
+        loadState();
+        createBgNeurons();
+        renderTopics();
+        updateUI();
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
